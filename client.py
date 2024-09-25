@@ -15,7 +15,7 @@ def client_program():
 
     try:
         # Отправляем запрос серверу
-        request = "Запрос данных"
+        request = "start"
         client_socket.sendall(request.encode('utf-8'))
         print(f"Отправлено: {request}")
 
