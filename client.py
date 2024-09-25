@@ -1,4 +1,5 @@
 import socket
+import subprocess
 
 
 def client_program():
@@ -22,13 +23,23 @@ def client_program():
         response = client_socket.recv(1024).decode('utf-8')
         print(f"Получено: {response}")
 
-        # Симулируем выполнение задачи и отправляем уведомление
-        if response == "Запрос получен, выполните задачу":
-            print("Задача выполняется...")
-            # Симуляция выполнения задачи
-            result = "Задача выполнена"
-            client_socket.sendall(result.encode('utf-8'))
-            print(f"Отправлено: {result}")
+        # Симулируем выполнение задачи и запускаем .exe файл
+        if response.startswith("Запуск .exe с параметром"):
+            # Предположим, что сервер передает строку типа: "Запуск .exe с параметром program.exe param1 param2"
+            command = response.split(" ", 1)[1]  # Получаем команду из ответа сервера
+
+            # Запуск .exe файла с параметрами
+            print(f"Запуск: {command}")
+            try:
+                result = subprocess.run(command, shell=True, check=True)
+                # Если выполнение завершилось успешно
+                client_socket.sendall(f"Задача выполнена: {command}".encode('utf-8'))
+                print(f"Отправлено: Задача выполнена")
+            except subprocess.CalledProcessError as e:
+                # Если возникла ошибка при выполнении
+                error_message = f"Ошибка при выполнении: {str(e)}"
+                client_socket.sendall(error_message.encode('utf-8'))
+                print(f"Отправлено: {error_message}")
 
     finally:
         # Закрываем соединение
